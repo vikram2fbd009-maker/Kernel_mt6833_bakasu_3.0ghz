@@ -1,0 +1,45 @@
+name: Build Kernel (Fast No-Cache)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-kernel:
+    name: Fast Build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential bc bison flex libssl-dev libelf-dev \
+            clang lld gcc-aarch64-linux-gnu gcc-arm-linux-gnueabihf \
+            cpio python3 zip kmod device-tree-compiler
+
+      - name: Compile Kernel
+        run: |
+          # Config generate
+          make ARCH=arm64 CC=clang CROSS_COMPILE=aarch64-linux-gnu- \
+            CLANG_TRIPLE=aarch64-linux-gnu- O=out camellia_defconfig
+          
+          # Fast Build (No -k, No ccache. Error aate hi ruk jayega)
+          make ARCH=arm64 CC=clang CROSS_COMPILE=aarch64-linux-gnu- \
+            CLANG_TRIPLE=aarch64-linux-gnu- O=out -j$(nproc)
+
+      - name: Build AnyKernel3
+        run: |
+          git clone https://github.com/osm0sis/AnyKernel3.git -b master AnyKernel3
+          cd AnyKernel3
+          rm -rf .git .github README.md
+          cp ../out/arch/arm64/boot/Image.gz-dtb .
+          zip -r9 "../BakaSU-SUSFS-Kernel.zip" * -x .git/*
+
+      - name: Upload Zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: kernel-flashable-zip
+          path: BakaSU-SUSFS-Kernel.zip
