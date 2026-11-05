@@ -1,4 +1,3 @@
-# Latest BakaSU Modular Makefile
 obj-$(CONFIG_KSU) += core/
 obj-$(CONFIG_KSU) += feature/
 obj-$(CONFIG_KSU) += hook/
