@@ -3892,7 +3892,6 @@ bool susfs_is_mnt_devname_ksu(struct path *path) {
 #endif
 
 #ifdef CONFIG_KSU
-extern int ksu_handle_path_umount(struct path *path);
 int path_umount(struct path *path, int flags)
 {
 	int ret;
@@ -3900,8 +3899,6 @@ int path_umount(struct path *path, int flags)
 	if (!path || !path->dentry)
 		return -EINVAL;
 
-	if (ksu_handle_path_umount(path))
-		return -EPERM;
 
 	ret = -EINVAL;
 	if (flags & MNT_DETACH)
