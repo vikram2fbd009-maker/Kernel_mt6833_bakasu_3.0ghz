@@ -4,19 +4,15 @@ define check_ksu_hook
   else
       $$(info -- You lost $(1) hook in your kernel)
       $$(info -- Read: https://bakasu.org/guide/manual-integrate.html)
-      $$(error You should integrate $$(REPO_NAME) in your kernel. $(3))
   endif
 endef
 
 define check_ksu_hook_incompatible
   ifeq ($$(shell grep -q -F "$(1)" $(2); echo $$$$?),0)
-      $$(info -- $(1) is incompatible hook)
       $$(info -- Read: https://bakasu.org/guide/manual-integrate.html)
-      $$(error You should integrate $$(REPO_NAME) in your kernel correctly.)
   endif
 endef
 
-$(eval $(call check_ksu_hook_incompatible,ksu_vfs_read_hook,$(srctree)/fs/read_write.c))
 $(eval $(call check_ksu_hook_incompatible,is_ksu_transition,$(srctree)/security/selinux/hooks.c))
 
 ifeq ($(CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK), y)
@@ -25,7 +21,6 @@ ifeq ($(CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK), y)
       $(info -- You can't use LSM hooks for kernel version >=6.8)
       $(info -- You should turn off CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK and hook setresuid manually)
       $(info -- Read: https://bakasu.org/guide/manual-integrate.html)
-      $(error You can't use LSM hooks when kernel version >= 6.8)
   endif
 else
   $(info -- $(REPO_NAME)/manual_hook: You are using a manual setresuid hook for setuid hooks.)
@@ -38,7 +33,6 @@ ifeq ($(CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK), y)
       $(info -- You can't use LSM hooks for kernel version >=6.8)
       $(info -- You should turn off CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK and hook sys_read manually.)
       $(info -- Read: https://bakasu.org/guide/manual-integrate.html)
-      $(error You can't use LSM hooks when kernel version >= 6.8)
   endif
 else
   $(info -- $(REPO_NAME)/manual_hook: You are using a manual sys_read hook for init rc hooks.)
@@ -55,13 +49,11 @@ endif
 ifeq ($(shell grep -q -w 'ksu_handle_execve' $(srctree)/fs/exec.c && echo y),y)
   $(info -- ksu_handle_execve is deprecated, please migrate to ksu_handle_execve_common)
   $(info -- Read: https://bakasu.org/guide/manual-integrate.html)
-  $(error You should integrate $(REPO_NAME) in your kernel correctly.)
 endif
 
 ifeq ($(shell grep -q -w 'ksu_handle_post_execve' $(srctree)/fs/exec.c && echo y),y)
   $(info -- ksu_handle_post_execve is deprecated, please migrate to ksu_handle_post_execve_common)
   $(info -- Read: https://bakasu.org/guide/manual-integrate.html)
-  $(error You should integrate $(REPO_NAME) in your kernel correctly.)
 endif
 
 ifeq ($(shell grep -q "ksu_handle_execveat" $(srctree)/fs/exec.c; echo $$?),0)
@@ -75,12 +67,10 @@ else
     else
       $(info -- You lost ksu_handle_execve_common hook in your kernel)
       $(info -- Read: https://bakasu.org/guide/manual-integrate.html)
-      $(error You should integrate $(REPO_NAME) in your kernel.)
     endif
   else
     $(info -- You lost ksu_handle_execveat hook in your kernel)
     $(info -- Read: https://bakasu.org/guide/manual-integrate.html)
-    $(error You should integrate $(REPO_NAME) in your kernel.)
   endif
 endif
 
